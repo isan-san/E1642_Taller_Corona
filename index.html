@@ -1,0 +1,68 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script
+    type="text/javascript"
+    src="https://static.sketchfab.com/api/sketchfab-viewer-1.12.1.js"
+  ></script>
+  </head>
+  <body style="padding: 5%">
+    <button onclick="logMaterials()">Log materials</button>
+    <div class="shapes-options">
+      <h2>Select a model</h2>
+      <div
+        id="shapes-buttons"
+        style="
+          display: flex;
+          flex-direction: row;
+          justify-content: space-around;
+          align-items: flex-start;
+        "
+      ></div>
+    </div>
+    <div class="textures-options">
+      <h2>Select a texture</h2>
+      <div
+        id="texture-buttons"
+        style="
+          display: flex;
+          flex-direction: row;
+          justify-content: space-around;
+          align-items: flex-start;
+        "
+      ></div>
+    </div>
+    <div id="model-panel">
+      <h2>
+        Model: <span id="shape-name"></span>
+      </h2>
+      <div id="model-canvas">
+        <div
+          class="sketchfab-embed-wrapper"
+          style="display: flex; justify-content: center"
+        >
+          <iframe
+            id="web-model"
+            title="none"
+            frameborder="0"
+            allowfullscreen
+            mozallowfullscreen="true"
+            webkitallowfullscreen="true"
+            allow="autoplay; fullscreen; xr-spatial-tracking"
+            xr-spatial-tracking
+            execution-while-out-of-viewport
+            execution-while-not-rendered
+            web-share
+            src="https://sketchfab.com/models/f83ea6822eb443bc9a38f3e7f3508eb3/embed?autostart=1"
+          >
+          </iframe>
+        </div>
+      </div>
+    </div>
+    <script src="/index.js"></script>
+  </body>
+
+</html>
