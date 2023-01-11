@@ -10,7 +10,6 @@
   ></script>
   </head>
   <body style="padding: 5%">
-    <button onclick="logMaterials()">Log materials</button>
     <div class="shapes-options">
       <h2>Select a model</h2>
       <div
@@ -19,7 +18,8 @@
           display: flex;
           flex-direction: row;
           justify-content: space-around;
-          align-items: flex-start;
+          align-items: stretch;
+          flex-wrap: wrap;
         "
       ></div>
     </div>
@@ -64,6 +64,13 @@
           </iframe>
         </div>
       </div>
+    </div>
+    <div class="context-images">
+      <h1>Imagenes de contexto</h1>
+    </div>
+
+    <div class="messures-images">
+      <h1>Imagenes ficha</h1>
     </div>
     <script src="/index.js"></script>
   </body>
