@@ -9,11 +9,11 @@ var currentTextureUid = []; // Lista con los UID de las texturas actuales del mo
 var isShapeButtons = false; // Variable booleana que indica si los botones de formas ya fueron creados
 var isTextureButtons = false; // Variable booleana que indica si los botones de textura ya fueron creados
 var shapeNameRef = "5264"; // Id del modelo inicial
-var textureNameRef = "000"; // Id de la textura inicial
+var textureNameRef = "937"; // Id de la textura inicial
 var uIdRef = ""; // UID del modelo que esta siendo mostrado
 const model = document.getElementById("web-model"); // Elemento HTML que contiene al modelo
 var updateTextureFunction; //Funcion definida durante la carga del cliente usada para actializar los modelos
-loadClient("a29f4e63121b4a79afcbafa9637b5c3f"); // Inicializacion del modelo
+loadClient("f83ea6822eb443bc9a38f3e7f3508eb3"); // Inicializacion del modelo
 var listOfGroups = ["otros", "bowls", "platos", "vasos", "bandejas", "tazas"]; //Lista de grupos disponibles
 var shapeGroupRef = "vasos"; // Grupo mostrad incialmente
 var shapeButtonsPairs = []; // Lista de objetos que incluyen grupo y un boton HTML
@@ -32,8 +32,8 @@ const setShapeNameRef = (shapeId) => {
       (pair) => pair.shape == shapeNameRef
     );
     if (tempRenderPair[0]) {
-      setSrc(tempRenderPair);
       loadTitles();
+      setSrc(tempRenderPair);
       reloadClient(tempRenderPair);
     }
   }
@@ -45,7 +45,6 @@ const setShapeNameRef = (shapeId) => {
 const setSrc = (tempRenderPair) => {
   if (tempRenderPair[0].UID) {
     model.src = `https://sketchfab.com/models/${tempRenderPair[0].UID}/embed?autostart=1`;
-    shapeGroupRef = tempRenderPair[0].group;
     createOtherMedia(0);
   } else {
     throw "Unable to set new model source";
@@ -71,10 +70,8 @@ const reloadClient = (tempRenderPair) => {
  * Re carga los titulos a partir de las variables de referencia
  */
 const loadTitles = () => {
-  document.getElementById("shape-name").innerText = shapeNameRef;
-  document.getElementById("texture-name").innerText = textureNameRef;
-  document.getElementById("group-name").innerText = shapeGroupRef;
-  document.getElementById("main-name").innerText = shapeNameRef;
+  const shapeTitle = document.getElementById("shape-name");
+  shapeTitle.innerText = shapeNameRef;
 };
 /**
  * Crea una etiqueta HTML div para contener los botones tanto de forma como de textura
@@ -95,15 +92,14 @@ const createTempDiv = () => {
  */
 const createShapeButton = (shapeId) => {
   const tempShapeButton = document.createElement("BUTTON");
-  tempShapeButton.style.backgroundColor = "transparent";
+  tempShapeButton.style.backgroundImage = `url('https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/recursos_formas/${shapeId}.png')`;
+  tempShapeButton.style.backgroundSize = "auto 100%";
+  tempShapeButton.style.backgroundRepeat = "no-repeat";
+  tempShapeButton.style.backgroundPosition = "center center";
+  tempShapeButton.style.height = "50px";
+  tempShapeButton.style.width = "20vw";
   tempShapeButton.style.border = "none";
-  // tempShapeButton.style.minWidth = "9.5vw"
-  const buttonBGImage = document.createElement("IMG");
-  buttonBGImage.src = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/recursos_formas/${shapeId}.png`;
-  buttonBGImage.style.height = "9.5vh";
-  buttonBGImage.style.maxWidth = "none"
   tempShapeButton.onclick = () => setShapeNameRef(shapeId);
-  tempShapeButton.appendChild(buttonBGImage);
   return tempShapeButton;
 };
 /**
@@ -112,7 +108,7 @@ const createShapeButton = (shapeId) => {
  */
 const renderShapeButtons = (group) => {
   const shapesButtons = document.getElementById("shapes-buttons");
-  shapesButtons.style.scrollSnapType = "x mandatory";
+  shapesButtons.style.scrollSnapType="x mandatory";
   const matchingButtons = shapeButtonsPairs.filter(
     (buttonPair) => buttonPair.group == group
   );
@@ -140,9 +136,8 @@ const createGroupsButtons = () => {
 const constructShapeButtons = () => {
   renderPairs.forEach((shape) => {
     const tempShapeDiv = createTempDiv();
-    tempShapeDiv.style.width = "30vw";
-    tempShapeDiv.style.height = "100%";
-    tempShapeDiv.style.scrollSnapAlign = "center";
+    tempShapeDiv.style.width="30vw";
+    tempShapeDiv.style.scrollSnapAlign="center";
     const tempShapeButton = createShapeButton(shape.shape);
     tempShapeDiv.appendChild(tempShapeButton);
     shapeButtonsPairs.push({ group: shape.group, element: tempShapeDiv });
@@ -158,7 +153,7 @@ const constructShapeButtons = () => {
 createTextureButton = (textureId) => {
   const iconsSize = "40px";
   const tempTextureButton = document.createElement("BUTTON");
-  tempTextureButton.style.backgroundImage = `url('https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/iconos_texturas/${textureId}.jpg')`;
+  tempTextureButton.style.backgroundImage = `url('https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/iconos_texturas/${textureId}.png')`;
   tempTextureButton.style.backgroundSize = `${iconsSize} ${iconsSize}`;
   tempTextureButton.style.height = iconsSize;
   tempTextureButton.style.width = iconsSize;
@@ -300,7 +295,6 @@ function loadClient(uIdRef) {
               currentTextureUid[i],
               function (err, textureUid) {
                 textureNameRef = textureId;
-                loadTitles();
               }
             );
           }

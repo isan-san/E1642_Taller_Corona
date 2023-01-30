@@ -5,21 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <script
-    type="text/javascript"
-    src="https://static.sketchfab.com/api/sketchfab-viewer-1.12.1.js"
-  ></script>
+      type="text/javascript"
+      src="https://static.sketchfab.com/api/sketchfab-viewer-1.12.1.js"
+    ></script>
   </head>
   <body style="padding: 5%">
     <div class="shapes-options">
       <h2>Select a model</h2>
+      <div id="shapes-groups"></div>
       <div
         id="shapes-buttons"
         style="
           display: flex;
           flex-direction: row;
-          justify-content: space-around;
-          align-items: stretch;
-          flex-wrap: wrap;
+          justify-content: flex-start;
+          align-items: center;
+          flex-wrap: nowrap;
+          width: 20vw;
+          overflow: scroll;
+          background-color: aquamarine;
         "
       ></div>
     </div>
@@ -35,16 +39,20 @@
         "
       ></div>
     </div>
-    <div id="model-panel"
-    style="height: 100%; width: 100%;">
-      <h2>
-        Model: <span id="shape-name"></span>
-      </h2>
-      <div id="model-canvas"
-      style="height: 100%; width: 100%;">
+    <div id="model-panel" style="height: 100%; width: 100%">
+      <h2>Model: <span id="shape-name">5264</span></h2>
+      <h2>Texture: <span id="texture-name">000</span></h2>
+      <h2>Texture: <span id="group-name">vasos</span></h2>
+      <h2>Texture: <span id="main-name">5264</span></h2>
+      <div id="model-canvas" style="height: 100%; width: 100%">
         <div
           class="sketchfab-embed-wrapper"
-          style="display: flex; justify-content: center; height: 100%; width: 100%;"
+          style="
+            display: flex;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+          "
         >
           <iframe
             id="web-model"
@@ -58,21 +66,32 @@
             execution-while-out-of-viewport
             execution-while-not-rendered
             web-share
-            src="https://sketchfab.com/models/f83ea6822eb443bc9a38f3e7f3508eb3/embed?autostart=1"
-            style="height: 100%; width: 100%;"
+            src="https://sketchfab.com/models/a29f4e63121b4a79afcbafa9637b5c3f/embed?autostart=1"
+            style="height: 100%; width: 100%; opacity: 0%"
           >
           </iframe>
         </div>
       </div>
     </div>
-    <div class="context-images">
+    <div style="height: 30vh; margin: 10vh">
       <h1>Imagenes de contexto</h1>
+      <div id="context-images" style="height: 70%; margin: 5vh"></div>
+      <div>
+        <button id="set-context-image-0"></button>
+        <button id="set-context-image-1"></button>
+        <button id="set-context-image-2"></button>
+      </div>
+    </div>
+    <div style="height: 30vh; margin: 10vh">
+      <h1>Imagenes ficha</h1>
+      <div id="messurment-images" style="height: 70%; margin: 5vh"></div>
+      <div>
+        <button id="set-messurment-image-0"></button>
+        <button id="set-messurment-image-1"></button>
+        <button id="set-messurment-image-2"></button>
+      </div>
     </div>
 
-    <div class="messures-images">
-      <h1>Imagenes ficha</h1>
-    </div>
     <script src="/index.js"></script>
   </body>
-
 </html>
