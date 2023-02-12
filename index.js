@@ -14,8 +14,8 @@ var uIdRef = ""; // UID del modelo que esta siendo mostrado
 const model = document.getElementById("web-model"); // Elemento HTML que contiene al modelo
 var updateTextureFunction; //Funcion definida durante la carga del cliente usada para actializar los modelos
 loadClient("a29f4e63121b4a79afcbafa9637b5c3f"); // Inicializacion del modelo
-var listOfGroups = ["otros", "bowls", "platos", "vasos", "bandejas", "tazas"]; //Lista de grupos disponibles
-var shapeGroupRef = "vasos"; // Grupo mostrad incialmente
+var listOfGroups = ["Bandejas", "Bebidas", "Bowls", "Complementos", "Platos", "Platos hondos"]; //Lista de grupos disponibles
+var shapeGroupRef = "Bandejas"; // Grupo mostrad incialmente
 var shapeButtonsPairs = []; // Lista de objetos que incluyen grupo y un boton HTML
 var isGroupButtons = false; // variable booleana que indica si ya se crearon los botones de grupos
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
