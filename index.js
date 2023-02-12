@@ -60,8 +60,6 @@ const reloadClient = (tempRenderPair) => {
   if (tempRenderPair[0].UID) {
     uIdRef = tempRenderPair[0].UID;
     const modelCanvas = document.getElementById("model-canvas");
-    modelCanvas.style.display = "none";
-    modelCanvas.style.display = "block";
     loadClient(uIdRef);
   } else {
     throw "Unable to reload client";
@@ -82,10 +80,7 @@ const loadTitles = () => {
  */
 const createTempDiv = () => {
   const tempDiv = document.createElement("DIV");
-  tempDiv.style.display = "flex";
-  tempDiv.style.flexDirection = "column";
-  tempDiv.style.justifyContent = "center";
-  tempDiv.style.alignItems = "center";
+  tempDiv.classList.add("image-holder")
   return tempDiv;
 };
 /**
@@ -95,13 +90,10 @@ const createTempDiv = () => {
  */
 const createShapeButton = (shapeId) => {
   const tempShapeButton = document.createElement("BUTTON");
-  tempShapeButton.style.backgroundColor = "transparent";
-  tempShapeButton.style.border = "none";
-  // tempShapeButton.style.minWidth = "9.5vw"
+  tempShapeButton.classList.add("shape-button");
   const buttonBGImage = document.createElement("IMG");
+  buttonBGImage.classList.add("button-image");
   buttonBGImage.src = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/recursos_formas/${shapeId}.png`;
-  buttonBGImage.style.height = "9.5vh";
-  buttonBGImage.style.maxWidth = "none"
   tempShapeButton.onclick = () => setShapeNameRef(shapeId);
   tempShapeButton.appendChild(buttonBGImage);
   return tempShapeButton;
@@ -112,7 +104,7 @@ const createShapeButton = (shapeId) => {
  */
 const renderShapeButtons = (group) => {
   const shapesButtons = document.getElementById("shapes-buttons");
-  shapesButtons.style.scrollSnapType = "x mandatory";
+  shapesButtons.classList.add("shapes-buttons");
   const matchingButtons = shapeButtonsPairs.filter(
     (buttonPair) => buttonPair.group == group
   );
@@ -140,9 +132,7 @@ const createGroupsButtons = () => {
 const constructShapeButtons = () => {
   renderPairs.forEach((shape) => {
     const tempShapeDiv = createTempDiv();
-    tempShapeDiv.style.width = "30vw";
-    tempShapeDiv.style.height = "100%";
-    tempShapeDiv.style.scrollSnapAlign = "center";
+    tempShapeDiv.classList.add("shape-div");
     const tempShapeButton = createShapeButton(shape.shape);
     tempShapeDiv.appendChild(tempShapeButton);
     shapeButtonsPairs.push({ group: shape.group, element: tempShapeDiv });
@@ -156,14 +146,9 @@ const constructShapeButtons = () => {
  * @returns Un boton con la imagen de una forma y los estilos listados en el metodo
  */
 createTextureButton = (textureId) => {
-  const iconsSize = "40px";
   const tempTextureButton = document.createElement("BUTTON");
+  tempTextureButton.classList.add("texture-button");
   tempTextureButton.style.backgroundImage = `url('https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/iconos_texturas/${textureId}.jpg')`;
-  tempTextureButton.style.backgroundSize = `${iconsSize} ${iconsSize}`;
-  tempTextureButton.style.height = iconsSize;
-  tempTextureButton.style.width = iconsSize;
-  tempTextureButton.style.border = "none";
-  tempTextureButton.style.borderRadius = "50%";
   tempTextureButton.onclick = () => updateTextureFunction(textureId);
   return tempTextureButton;
 };
@@ -192,26 +177,18 @@ const createOtherMedia = (index) => {
   messurmentImages.innerHTML = "";
 
   const tempContextImg = document.createElement("IMG");
+  tempContextImg.classList.add("context-images");
   tempContextImg.id = "context-image";
   const tempMessurmentImg = document.createElement("IMG");
+  tempMessurmentImg.classList.add("messurment-images");
   tempMessurmentImg.id = "messurment-image";
   tempContextImg.src = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/recursos_formas/${shapeNameRef}_context${index}.png`;
   tempMessurmentImg.src = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/recursos_formas/${shapeNameRef}_messurment${index}.png`;
-  tempContextImg.style.objectFit = "cover";
-  tempContextImg.style.height = "15vh";
-  tempContextImg.style.maxWidth = "none";
-  tempContextImg.style.width = "100%";
-  tempMessurmentImg.style.objectFit = "cover";
-  tempMessurmentImg.style.height = "15vh";
-  tempMessurmentImg.style.maxWidth = "none";
-  tempMessurmentImg.style.width = "100%";
   const tempContextDiv = createTempDiv();
-  tempContextDiv.style.maxHeight = "100%";
-  tempContextDiv.style.minWidth = "100%";
+  tempContextDiv.classList.add("other-media-div");
   tempContextDiv.appendChild(tempContextImg);
   const tempMessurmentDIV = createTempDiv();
-  tempMessurmentDIV.style.maxHeight = "100%";
-  tempMessurmentDIV.style.minWidth = "100%";
+  tempMessurmentDIV.classList.add("other-media-div");
   tempMessurmentDIV.appendChild(tempMessurmentImg);
   contextImages.appendChild(tempContextDiv);
   messurmentImages.appendChild(tempMessurmentDIV);
