@@ -1,3 +1,4 @@
+
 /**
  * Definición variables
  */
@@ -242,7 +243,7 @@ const getData = () => {
 // Model Control ---------------------------------------------------------------------------------------
 function loadClient(uIdRef) {
   var version = "1.12.1";
-  var client = new Sketchfab(version, model);
+  var client = new favClient.Sketchfab(version, model);
   var uid = uIdRef;
   let success = function success(api) {
     api.start(() => {
