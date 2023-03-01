@@ -4,34 +4,72 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <!-- <script
+    <script
       type="text/javascript"
       src="https://static.sketchfab.com/api/sketchfab-viewer-1.12.1.js"
-    ></script> -->
-    <link rel="stylesheet" href="/index_styles.css">
-    <style>
-
-    </style>
+    ></script>
+    <link rel="stylesheet" href="/index_styles.css" />
+    <style></style>
   </head>
   <body style="padding: 5%">
+    <div class="modal-container">
+      <span class="close cursor" onclick="closeModal()">&times;</span>
+      <div class="modal-content">
+        <img
+          class="additional-information"
+          src="/assets/moto-guzzi-california.jpg"
+          alt="medidas"
+        />
+      </div>
+    </div>
     <div class="shapes-options">
       <h2>Select a model</h2>
       <div id="shapes-groups"></div>
-      <div
-        id="shapes-buttons"
-      ></div>
+      <div id="shapes-buttons"></div>
     </div>
     <div class="textures-options">
       <h2>Select a texture</h2>
-      <div
-        id="texture-buttons"
-      ></div>
+      <div id="texture-buttons"></div>
     </div>
+    <h3>like button</h3>
+    <button onclick="likeClicked()" class="like-button">
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <mask
+          id="mask0_835_7773"
+          style="mask-type: alpha"
+          maskUnits="userSpaceOnUse"
+          x="0"
+          y="0"
+          width="24"
+          height="24"
+        >
+          <rect width="24" height="24" fill="#D9D9D9" />
+        </mask>
+        <g mask="url(#mask0_835_7773)">
+          <path
+            d="M12 21L8.825 18.15C7.625 17.0667 6.596 16.1 5.738 15.25C4.87933 14.4 4.171 13.6 3.613 12.85C3.05433 12.1 2.646 11.375 2.388 10.675C2.12933 9.975 2 9.24167 2 8.475C2 6.90833 2.525 5.604 3.575 4.562C4.625 3.52067 5.93333 3 7.5 3C8.36667 3 9.19167 3.18333 9.975 3.55C10.7583 3.91667 11.4333 4.43333 12 5.1C12.5667 4.43333 13.2417 3.91667 14.025 3.55C14.8083 3.18333 15.6333 3 16.5 3C17.85 3 18.9833 3.379 19.9 4.137C20.8167 4.89567 21.4417 5.85 21.775 7H19.65C19.35 6.33333 18.9083 5.83333 18.325 5.5C17.7417 5.16667 17.1333 5 16.5 5C15.65 5 14.9167 5.22933 14.3 5.688C13.6833 6.146 13.1083 6.75 12.575 7.5H11.425C10.9083 6.75 10.321 6.146 9.663 5.688C9.00433 5.22933 8.28333 5 7.5 5C6.55 5 5.729 5.329 5.037 5.987C4.34567 6.64567 4 7.475 4 8.475C4 9.025 4.11667 9.58333 4.35 10.15C4.58333 10.7167 5 11.371 5.6 12.113C6.2 12.8543 7.01667 13.7207 8.05 14.712C9.08333 15.704 10.4 16.9 12 18.3C12.4333 17.9167 12.9417 17.475 13.525 16.975C14.1083 16.475 14.575 16.0583 14.925 15.725L15.15 15.95L15.637 16.438L16.125 16.925L16.35 17.15C15.9833 17.4833 15.5167 17.8957 14.95 18.387C14.3833 18.879 13.8833 19.3167 13.45 19.7L12 21ZM19 17V14H16V12H19V9H21V12H24V14H21V17H19Z"
+            fill="#332B17"
+          />
+        </g>
+      </svg>
+    </button>
+    <div><h1>Liked pairs form</h1></div>
+    <input class="liked-list" value="hola" />
+    <div><h1>Liked pairs</h1></div>
+    <div class="liked-cards"></div>
+    <div></div>
     <div id="model-panel" style="height: 100%; width: 100%">
-      <h2>Model: <span id="shape-name">5264</span></h2>
-      <h2>Texture: <span id="texture-name">000</span></h2>
-      <h2>Texture: <span id="group-name">vasos</span></h2>
-      <h2>Texture: <span id="main-name">5264</span></h2>
+      <h2>Tipo: <span class="group-name">Bandejas</span></h2>
+      <h2>Forma: <span class="shape-name">5264</span></h2>
+      <h2>Acabado: <span class="texture-name">000</span></h2>
+      <h2>Medidas: <span class="messurments-name">Medidas</span></h2>
+      <!-- <h2>Texture: <span id="main-name">5264</span></h2> -->
       <div id="model-canvas" style="height: 100%; width: 100%">
         <div
           class="sketchfab-embed-wrapper"
@@ -65,18 +103,18 @@
       <h1>Imagenes de contexto</h1>
       <div id="context-images" style="height: 70%; margin: 5vh"></div>
       <div>
-        <button id="set-context-image-0"></button>
+        <!-- <button id="set-context-image-0"></button>
         <button id="set-context-image-1"></button>
-        <button id="set-context-image-2"></button>
+        <button id="set-context-image-2"></button> -->
       </div>
     </div>
     <div style="height: 30vh; margin: 10vh">
       <h1>Imagenes ficha</h1>
       <div id="messurment-images" style="height: 70%; margin: 5vh"></div>
       <div>
-        <button id="set-messurment-image-0"></button>
+        <!-- <button id="set-messurment-image-0"></button>
         <button id="set-messurment-image-1"></button>
-        <button id="set-messurment-image-2"></button>
+        <button id="set-messurment-image-2"></button> -->
       </div>
     </div>
 
