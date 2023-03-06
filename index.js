@@ -4,12 +4,12 @@
 var renderPairs = ""; //Lista de pares que contiene: shape(ID de la forma), group(Grupo al que pertenece), UID(identificador usado para sketchfav)
 var texturesIds = ""; //Lista con los ids de las texturas
 const dataUrl =
-  // "https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/json_pares.txt"; // Link con la informacion de sobre de los id de las texturas
-  "/json_pares.txt";
+  "https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/json_pares.txt"; // Link con la informacion de sobre de los id de las texturas
+// "/json_pares.txt";
 var currentTextureUid = []; // Lista con los UID de las texturas actuales del modelo
 var isShapeButtons = false; // Variable booleana que indica si los botones de formas ya fueron creados
 var isTextureButtons = false; // Variable booleana que indica si los botones de textura ya fueron creados
-var shapeGroupRef = "Bandejas"; // Grupo mostrad incialmente
+var shapeGroupRef = "Platos"; // Grupo mostrad incialmente
 var shapeNameRef = "7128"; // Id del modelo inicial
 var textureNameRef = "000"; // Id de la textura inicial
 var shapeMessurmentsRef = "13cmx12cm"; // Id del modelo inicial
@@ -46,6 +46,7 @@ const setShapeNameRef = (shapeId) => {
     if (tempRenderPair[0]) {
       setSrc(tempRenderPair);
       loadTitles();
+      toogleTextureLoad (false);
       reloadClient(tempRenderPair);
     }
   }
@@ -153,14 +154,15 @@ const activateTextures = (tempTextureButton) => {
  * Filtra de la lista de botones de formas los que coinciden con el grupo del parametro y los inyecta en el div de los botones de formas
  * @param {Grupo usado para flitrar en la lista de botones de formas} group
  */
-const renderShapeButtons = (group) => {
+const renderShapeButtons = (group, isFirstTime) => {
   const shapesButtons = document.getElementById("shapes-buttons");
   shapesButtons.classList.add("shapes-buttons");
   const matchingButtons = shapeButtonsPairs.filter(
     (buttonPair) => buttonPair.group == group
   );
   shapesButtons.innerHTML = "";
-  matchingButtons.forEach((button) => {
+  matchingButtons.forEach((button, index) => {
+
     shapesButtons.appendChild(button.element);
   });
 };
@@ -169,10 +171,11 @@ const renderShapeButtons = (group) => {
  */
 const createGroupsButtons = () => {
   const shapesDiv = document.getElementById("shapes-groups");
-  listOfGroups.forEach((group) => {
+  listOfGroups.forEach((group, index) => {
     const tempGroupButton = document.createElement("BUTTON");
     tempGroupButton.innerText = group;
     tempGroupButton.classList.add("group-button");
+    if (index == 0) tempGroupButton.classList.add("active-goup");
     tempGroupButton.onclick = () => {
       if (!tempGroupButton.classList.contains("active-goup")) {
         activateGroup(tempGroupButton);
@@ -186,15 +189,17 @@ const createGroupsButtons = () => {
 /**
  * Usando la lista de pares como base construye los botones que permiten seleccionar los modelos y los inyecta en una etiqueta DIV
  */
-const constructShapeButtons = () => {
-  renderPairs.forEach((shape) => {
+const constructShapeButtons = (isFirstTime) => {
+  renderPairs.forEach((shape, index) => {
     const tempShapeDiv = createTempDiv();
     tempShapeDiv.classList.add("shape-div");
     const tempShapeButton = createShapeButton(shape.shape);
     tempShapeDiv.appendChild(tempShapeButton);
+    if (index == 0)
+    activateShape(tempShapeButton);
     shapeButtonsPairs.push({ group: shape.group, element: tempShapeDiv });
   });
-  renderShapeButtons(shapeGroupRef);
+  renderShapeButtons(shapeGroupRef, isFirstTime);
   isShapeButtons = true;
 };
 /**
@@ -207,6 +212,7 @@ createTextureButton = (textureId) => {
   tempTextureButton.classList.add("texture-button");
   tempTextureButton.style.backgroundImage = `url('https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/iconos_texturas/${textureId}.jpg')`;
   tempTextureButton.onclick = () => {
+    toogleTextureLoad (false);
     activateTextures(tempTextureButton);
     updateTextureFunction(textureId);
   };
@@ -218,7 +224,7 @@ createTextureButton = (textureId) => {
 const constructTextureButtons = () => {
   let texturesButtons = document.getElementById("texture-buttons");
   texturesButtons.innerHTML = "";
-  texturesIds.forEach((textureId) => {
+  texturesIds.forEach((textureId, index) => {
     const tempTextureDiv = createTempDiv();
     const tempTextureButton = createTextureButton(textureId);
     tempTextureDiv.appendChild(tempTextureButton);
@@ -242,7 +248,9 @@ const createOtherMedia = (index) => {
   tempContextImg.src = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/recursos_formas/${shapeNameRef}_context${index}.jpg`;
   tempMessurmentImg.src = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/recursos_formas/${shapeNameRef}_messurment${index}.jpg`;
   tempContextImg.addEventListener("click", () => openModal(tempContextImg.src));
-  tempMessurmentImg.addEventListener("click", () => openModal(tempMessurmentImg.src));
+  tempMessurmentImg.addEventListener("click", () =>
+    openModal(tempMessurmentImg.src)
+  );
   const tempContextDiv = createTempDiv();
   tempContextDiv.classList.add("other-media-div");
   tempContextDiv.appendChild(tempContextImg);
@@ -292,10 +300,10 @@ const getData = () => {
     .then((r) => r.text())
     .then((t) => {
       const newPairs = JSON.parse(t);
-      listOfGroups = newPairs.groups;
-      renderPairs = newPairs.pairs;
-      texturesIds = newPairs.texturesIds;
-      if (!isShapeButtons) constructShapeButtons();
+      listOfGroups = [...newPairs.groups];
+      renderPairs = [...newPairs.pairs];
+      texturesIds = [...newPairs.texturesIds];
+      if (!isShapeButtons) constructShapeButtons(true);
       if (!isTextureButtons) constructTextureButtons();
       if (!isGroupButtons) createGroupsButtons();
       shapeNameRef = renderPairs[0].shape;
@@ -312,6 +320,7 @@ function loadClient(uIdRef) {
   let success = function success(api) {
     api.start(() => {
       api.addEventListener("viewerready", function () {
+        toogleTextureLoad (true);
         model.style.opacity = "100%";
         createOtherMedia(0);
         if (!isShapeButtons && !isTextureButtons && !isGroupButtons) getData();
@@ -345,6 +354,7 @@ function loadClient(uIdRef) {
                 if (!loaded) {
                   loaded = true;
                   loadTitles();
+                  toogleTextureLoad (true);
                 }
               }
             );
@@ -387,25 +397,95 @@ const likeClicked = () => {
     let likedPair = {
       shape: shapeNameRef,
       texture: textureNameRef,
+      quantity: 24,
     };
     likedPairs = [...likedPairs, likedPair];
     liked = true;
   }
   fillLiked();
+  fillForm();
   changeIcon();
 };
 
+var likedCards = document.querySelector(".liked-cards");
+var newElement = document.querySelector(".liked-card").cloneNode(true);
+likedCards.innerHTML = "";
 const fillLiked = () => {
-  let likedCards = document.querySelector(".liked-cards");
-  let likedForm = document.querySelector(".liked-list");
   likedCards.innerHTML = "";
-  likedForm.value = "";
   likedPairs.forEach((pair, index) => {
-    let element = `<div class="likedCard"><h4>${index}. Liked pair</h4><div><p class="text-button">Forma: ${pair.shape} Texture: ${pair.texture}</p></div></div>`;
-    likedCards.innerHTML = likedCards.innerHTML + element;
-    likedForm.value =
-      likedForm.value + `For:${pair.shape} Tex:${pair.texture},\n`;
+    let element = newElement.cloneNode(true);
+    element.querySelector(".codigo-forma").innerText = pair.shape;
+    element.querySelector(".codig-textura").innerText = pair.texture;
+    element.querySelector(".texto-medidas").innerText = renderPairs.find(
+      (shape) => shape.shape === pair.shape
+    ).messurments;
+    element.querySelector(".w-input").value = pair.quantity;
+    element.querySelector(".w-input").addEventListener("input", function (evt) {
+      inputCantidad(
+        Number(this.value),
+        index,
+        element.querySelector(".w-input")
+      );
+    });
+    element.querySelector(
+      ".image-40"
+    ).srcset = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/recursos_formas/${pair.shape}.png`;
+    element
+      .querySelector(".decrese")
+      .addEventListener("click", () =>
+        changeCantidad(-1, index, element.querySelector(".w-input"))
+      );
+    element
+      .querySelector(".increse")
+      .addEventListener("click", () =>
+        changeCantidad(1, index, element.querySelector(".w-input"))
+      );
+    likedCards.appendChild(element);
   });
+};
+
+const fillForm = () => {
+  let likedForm = document.querySelector(".liked-list");
+  likedForm.value = "";
+  likedPairs.forEach((pair) => {
+    likedForm.value =
+      likedForm.value +
+      `For:${pair.shape} Tex:${pair.texture} Can:${pair.quantity},\n`;
+  });
+};
+
+const inputCantidad = (number, pair, element) => {
+  likedPairs[pair].quantity = number;
+  if (likedPairs[pair].quantity < 24) {
+    if (confirm("Estás a punto de descartar la pieza\n ¿estás seguro?")) {
+      likedPairs.splice(pair, 1);
+      checkLiked();
+      fillLiked();
+      fillForm();
+    } else {
+      likedPairs[pair].quantity = likedPairs[pair].quantity - number;
+    }
+  } else {
+    element.value = likedPairs[pair].quantity;
+    fillForm();
+  }
+};
+
+const changeCantidad = (number, pair, element) => {
+  likedPairs[pair].quantity = likedPairs[pair].quantity + number;
+  if (likedPairs[pair].quantity < 1) {
+    if (confirm("Estás a punto de descartar la pieza\n ¿estás seguro?")) {
+      likedPairs.splice(pair, 1);
+      checkLiked();
+      fillLiked();
+      fillForm();
+    } else {
+      likedPairs[pair].quantity = likedPairs[pair].quantity - number;
+    }
+  } else {
+    element.value = likedPairs[pair].quantity;
+    fillForm();
+  }
 };
 
 const checkLiked = () => {
@@ -421,15 +501,19 @@ const checkLiked = () => {
 };
 
 function changeIcon() {
-  let likeButton = document.querySelector(".like-button");
+  let likeButton = document.querySelector(".heart-button");
   if (liked) {
-    likeButton.innerHTML =
-      '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><mask id="mask0_835_7779" style="mask-type:alpha"maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24" fill="#D9D9D9"/></mask><g mask="url(#mask0_835_7779)"><path d="M12 21.35L10.55 20.05C8.86667 18.5333 7.475 17.225 6.375 16.125C5.275 15.025 4.4 14.0373 3.75 13.162C3.1 12.2873 2.646 11.4833 2.388 10.75C2.12933 10.0167 2 9.26667 2 8.5C2 6.93333 2.525 5.625 3.575 4.575C4.625 3.525 5.93333 3 7.5 3C8.36667 3 9.19167 3.18333 9.975 3.55C10.7583 3.91667 11.4333 4.43333 12 5.1C12.5667 4.43333 13.2417 3.91667 14.025 3.55C14.8083 3.18333 15.6333 3 16.5 3C18.0667 3 19.375 3.525 20.425 4.575C21.475 5.625 22 6.93333 22 8.5C22 9.26667 21.871 10.0167 21.613 10.75C21.3543 11.4833 20.9 12.2873 20.25 13.162C19.6 14.0373 18.725 15.025 17.625 16.125C16.525 17.225 15.1333 18.5333 13.45 20.05L12 21.35ZM12 18.65C13.6 17.2167 14.9167 15.9873 15.95 14.962C16.9833 13.9373 17.8 13.046 18.4 12.288C19 11.5293 19.4167 10.854 19.65 10.262C19.8833 9.67067 20 9.08333 20 8.5C20 7.5 19.6667 6.66667 19 6C18.3333 5.33333 17.5 5 16.5 5C15.7167 5 14.9917 5.22067 14.325 5.662C13.6583 6.104 13 6.85 12.5 7.3501H11.5C11 6.85 10.3417 6.104 9.675 5.662C9.00833 5.22067 8.28333 5 7.5 5C6.5 5 5.66667 5.33333 5 6C4.33333 6.66667 4 7.5 4 8.5C4 9.08333 4.11667 9.67067 4.35 10.262C4.58333 10.854 5 11.5293 5.6 12.288C6.2 13.046 7.01667 13.9373 8.05 14.962C9.08333 15.9873 10.4 17.2167 12 18.65Z" fill="#332B17"/><path d="M12 18.65C13.6 17.2167 14.9167 15.9873 15.95 14.962C16.9833 13.9373 17.8 13.046 18.4 12.288C19 11.5293 19.4167 10.854 19.65 10.262C19.8833 9.67067 20 9.08333 20 8.5C20 7.5 19.6667 6.66667 19 6C18.3333 5.33333 17.5 5 16.5 5C15.7167 5 14.9917 5.22067 14.325 5.662C13.6583 6.104 13 6.85 12.5 7.3501H11.5C11 6.85 10.3417 6.104 9.675 5.662C9.00833 5.22067 8.28333 5 7.5 5C6.5 5 5.66667 5.33333 5 6C4.33333 6.66667 4 7.5 4 8.5C4 9.08333 4.11667 9.67067 4.35 10.262C4.58333 10.854 5 11.5293 5.6 12.288C6.2 13.046 7.01667 13.9373 8.05 14.962C9.08333 15.9873 10.4 17.2167 12 18.65Z" fill="#332B17"/></g></svg>';
+    likeButton.src =
+      "https://uploads-ssl.webflow.com/63d28e442de3a6220d413f4a/6400d4f43969541c21f5a82e_hearth_filled.svg";
   } else {
-    likeButton.innerHTML =
-      '<svg width="24" height="24" viewBox="0 0 24 24"fill="none"xmlns="http://www.w3.org/2000/svg"><mask id="mask0_835_7773" style="mask-type:alpha"maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24"fill="#D9D9D9"/></mask><g mask="url(#mask0_835_7773)"><path d="M12 21L8.825 18.15C7.625 17.0667 6.596 16.1 5.738 15.25C4.87933 14.4 4.171 13.6 3.613 12.85C3.05433 12.1 2.646 11.375 2.388 10.675C2.12933 9.975 2 9.24167 2 8.475C2 6.90833 2.525 5.604 3.575 4.562C4.625 3.52067 5.93333 3 7.5 3C8.36667 3 9.19167 3.18333 9.975 3.55C10.7583 3.91667 11.4333 4.43333 12 5.1C12.5667 4.43333 13.2417 3.91667 14.025 3.55C14.8083 3.18333 15.6333 3 16.5 3C17.85 3 18.9833 3.379 19.9 4.137C20.8167 4.89567 21.4417 5.85 21.775 7H19.65C19.35 6.33333 18.9083 5.83333 18.325 5.5C17.7417 5.16667 17.1333 5 16.5 5C15.65 5 14.9167 5.22933 14.3 5.688C13.6833 6.146 13.1083 6.75 12.575 7.5H11.425C10.9083 6.75 10.321 6.146 9.663 5.688C9.00433 5.22933 8.28333 5 7.5 5C6.55 5 5.729 5.329 5.037 5.987C4.34567 6.64567 4 7.475 4 8.475C4 9.025 4.11667 9.58333 4.35 10.15C4.58333 10.7167 5 11.371 5.6 12.113C6.2 12.8543 7.01667 13.7207 8.05 14.712C9.08333 15.704 10.4 16.9 12 18.3C12.4333 17.9167 12.9417 17.475 13.525 16.975C14.1083 16.475 14.575 16.0583 14.925 15.725L15.15 15.95L15.637 16.438L16.125 16.925L16.35 17.15C15.9833 17.4833 15.5167 17.8957 14.95 18.387C14.3833 18.879 13.8833 19.3167 13.45 19.7L12 21ZM19 17V14H16V12H19V9H21V12H24V14H21V17H19Z" fill="#332B17"/></g></svg>';
+    likeButton.src =
+      "https://assets.website-files.com/63d28e442de3a6220d413f4a/63f3cbefa7086e1913c53bbd_heart_plus.svg";
   }
 }
+
+document
+  .querySelector(".heart-button")
+  .addEventListener("click", () => likeClicked());
 
 const closeModal = () => {
   document.querySelector(".modal-container").style.display = "none";
@@ -441,3 +525,7 @@ const openModal = (src) => {
   additionalInformation.src = src;
   modalImage.style.display = "block";
 };
+const toogleTextureLoad = (toogle) =>{
+  if(toogle)document.querySelector(".texture-buttons").style.pointerEvents = "auto";
+  else document.querySelector(".texture-buttons").style.pointerEvents = "none";
+}

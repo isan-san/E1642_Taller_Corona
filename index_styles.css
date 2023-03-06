@@ -14,7 +14,7 @@
   justify-content: flex-start;
   align-items: center;
   flex-wrap: nowrap;
-  width: 20vw;
+  /* width: 20vw; */
   background-color: aquamarine;
 }
 
@@ -60,6 +60,7 @@
   width: 40px;
   border: none;
   border-radius: 50%;
+  
 }
 .button-image {
   height: 9.5vh;
@@ -94,7 +95,13 @@
   border: solid 5px black;
 }
 .active-texture {
-  border: solid 5px black;
+  border: solid 2px #1B4163;
+  background-size: 50px 50px;
+  height: 50px;
+  width: 50px;
+  padding:5px;
+  opacity: 100%;
+  background-clip:content-box;
 }
 .likedCard {
   border: solid 1px black;
@@ -142,4 +149,14 @@
   color: #999;
   text-decoration: none;
   cursor: pointer;
+}
+.textures-load{
+  display: none;
+  background-color: #000000a8;
+  color: wheat;
+  position: absolute;
+  width: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
