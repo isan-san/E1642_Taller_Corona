@@ -6,6 +6,7 @@ var texturesIds = ""; //Lista con los ids de las texturas
 const dataUrl =
   "https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/json_pares.txt"; // Link con la informacion de sobre de los id de las texturas
 // "/json_pares.txt";
+// "/JSON_Exel.txt";
 var currentTextureUid = []; // Lista con los UID de las texturas actuales del modelo
 var isShapeButtons = false; // Variable booleana que indica si los botones de formas ya fueron creados
 var isTextureButtons = false; // Variable booleana que indica si los botones de textura ya fueron creados
@@ -46,7 +47,7 @@ const setShapeNameRef = (shapeId) => {
     if (tempRenderPair[0]) {
       setSrc(tempRenderPair);
       loadTitles();
-      toogleTextureLoad (false);
+      toogleTextureLoad(false);
       reloadClient(tempRenderPair);
     }
   }
@@ -113,7 +114,7 @@ const createTempDiv = () => {
  * @param {Id de un objeto de la lista de pares usado para referenciar una imagen en AWS} shapeId
  * @returns Un boton con la imagen de una forma y los estilos listados en el metodo
  */
-const createShapeButton = (shapeId) => {
+const createShapeButton = (shapeId, textures) => {
   const tempShapeButton = document.createElement("BUTTON");
   tempShapeButton.classList.add("shape-button");
   const buttonBGImage = document.createElement("IMG");
@@ -122,6 +123,7 @@ const createShapeButton = (shapeId) => {
   tempShapeButton.onclick = () => {
     activateShape(tempShapeButton);
     setShapeNameRef(shapeId);
+    constructTextureButtons(textures);
   };
   tempShapeButton.appendChild(buttonBGImage);
   return tempShapeButton;
@@ -162,7 +164,6 @@ const renderShapeButtons = (group, isFirstTime) => {
   );
   shapesButtons.innerHTML = "";
   matchingButtons.forEach((button, index) => {
-
     shapesButtons.appendChild(button.element);
   });
 };
@@ -193,38 +194,46 @@ const constructShapeButtons = (isFirstTime) => {
   renderPairs.forEach((shape, index) => {
     const tempShapeDiv = createTempDiv();
     tempShapeDiv.classList.add("shape-div");
-    const tempShapeButton = createShapeButton(shape.shape);
+    const tempShapeButton = createShapeButton(
+      shape.shape,
+      shape.availableTextures
+    );
     tempShapeDiv.appendChild(tempShapeButton);
-    if (index == 0)
-    activateShape(tempShapeButton);
+    if (index == 0) activateShape(tempShapeButton);
     shapeButtonsPairs.push({ group: shape.group, element: tempShapeDiv });
   });
   renderShapeButtons(shapeGroupRef, isFirstTime);
   isShapeButtons = true;
 };
+
+var baseTextureButton = document
+  .querySelector(".texture-button")
+  .cloneNode(true);
 /**
  * Crea y retorn aun boton, le da de fondo una imagen que extrae desde AWS y los estilos listados en el metodo
  * @param {Id de una textura de la lista de texturas usado para referenciar una imagen en AWS} shapeId
  * @returns Un boton con la imagen de una forma y los estilos listados en el metodo
  */
 createTextureButton = (textureId) => {
-  const tempTextureButton = document.createElement("BUTTON");
-  tempTextureButton.classList.add("texture-button");
-  tempTextureButton.style.backgroundImage = `url('https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/iconos_texturas/${textureId}.jpg')`;
-  tempTextureButton.onclick = () => {
-    toogleTextureLoad (false);
+  const tempTextureButton = baseTextureButton.cloneNode(true);
+  tempTextureButton.querySelector(".texture-image").src = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/iconos_texturas/${textureId}.jpg`;
+  tempTextureButton.addEventListener("click", () => {
+    toogleTextureLoad(false);
     activateTextures(tempTextureButton);
     updateTextureFunction(textureId);
-  };
+  });
   return tempTextureButton;
 };
 /**
  * Usando la lista de texturas como base construye los botones que permiten seleccionar los modelos y los inyecta en una etiqueta DIV
  */
-const constructTextureButtons = () => {
+const constructTextureButtons = (textures) => {
   let texturesButtons = document.getElementById("texture-buttons");
   texturesButtons.innerHTML = "";
-  texturesIds.forEach((textureId, index) => {
+  let renderingTextures = textures.filter((texture) =>
+    texturesIds.includes(texture)
+  );
+  renderingTextures.forEach((textureId, index) => {
     const tempTextureDiv = createTempDiv();
     const tempTextureButton = createTextureButton(textureId);
     tempTextureDiv.appendChild(tempTextureButton);
@@ -301,10 +310,13 @@ const getData = () => {
     .then((t) => {
       const newPairs = JSON.parse(t);
       listOfGroups = [...newPairs.groups];
-      renderPairs = [...newPairs.pairs];
-      texturesIds = [...newPairs.texturesIds];
+      renderPairs = newPairs.pairs.filter((pair) => pair.isAvailable);
+      texturesIds = newPairs.texturesIds
+        .filter((texture) => texture.isAvailable)
+        .map((texture) => texture.texture);
       if (!isShapeButtons) constructShapeButtons(true);
-      if (!isTextureButtons) constructTextureButtons();
+      if (!isTextureButtons)
+        constructTextureButtons(renderPairs[0].availableTextures);
       if (!isGroupButtons) createGroupsButtons();
       shapeNameRef = renderPairs[0].shape;
       shapeGroupRef = renderPairs[0].group;
@@ -320,7 +332,7 @@ function loadClient(uIdRef) {
   let success = function success(api) {
     api.start(() => {
       api.addEventListener("viewerready", function () {
-        toogleTextureLoad (true);
+        toogleTextureLoad(true);
         model.style.opacity = "100%";
         createOtherMedia(0);
         if (!isShapeButtons && !isTextureButtons && !isGroupButtons) getData();
@@ -354,7 +366,7 @@ function loadClient(uIdRef) {
                 if (!loaded) {
                   loaded = true;
                   loadTitles();
-                  toogleTextureLoad (true);
+                  toogleTextureLoad(true);
                 }
               }
             );
@@ -525,7 +537,8 @@ const openModal = (src) => {
   additionalInformation.src = src;
   modalImage.style.display = "block";
 };
-const toogleTextureLoad = (toogle) =>{
-  if(toogle)document.querySelector(".texture-buttons").style.pointerEvents = "auto";
+const toogleTextureLoad = (toogle) => {
+  if (toogle)
+    document.querySelector(".texture-buttons").style.pointerEvents = "auto";
   else document.querySelector(".texture-buttons").style.pointerEvents = "none";
-}
+};
