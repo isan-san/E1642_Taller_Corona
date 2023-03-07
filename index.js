@@ -4,8 +4,8 @@
 var renderPairs = ""; //Lista de pares que contiene: shape(ID de la forma), group(Grupo al que pertenece), UID(identificador usado para sketchfav)
 var texturesIds = ""; //Lista con los ids de las texturas
 const dataUrl =
-  "https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/json_pares.txt"; // Link con la informacion de sobre de los id de las texturas
-// "/json_pares.txt";
+  // "https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/json_pares.txt"; // Link con la informacion de sobre de los id de las texturas
+  "/json_pares.txt";
 // "/JSON_Exel.txt";
 var currentTextureUid = []; // Lista con los UID de las texturas actuales del modelo
 var isShapeButtons = false; // Variable booleana que indica si los botones de formas ya fueron creados
@@ -16,7 +16,6 @@ var textureNameRef = "000"; // Id de la textura inicial
 var shapeMessurmentsRef = "13cmx12cm"; // Id del modelo inicial
 var likedPairs = [];
 var liked = false;
-var uIdRef = ""; // UID del modelo que esta siendo mostrado
 var width = window.innerWidth;
 console.log(width);
 var model;
@@ -27,77 +26,44 @@ if (width < 480) {
 }
 // Elemento HTML que contiene al modelo
 var updateTextureFunction; //Funcion definida durante la carga del cliente usada para actializar los modelos
-loadClient("19c542ed76f74e8c8b7a2ca28291128a"); // Inicializacion del modelo
+loadClient({UID:"19c542ed76f74e8c8b7a2ca28291128a"}); // Inicializacion del modelo
 var listOfGroups = []; //Lista de grupos disponibles
 var shapeButtonsPairs = []; // Lista de objetos que incluyen grupo y un boton HTML
 var isGroupButtons = false; // variable booleana que indica si ya se crearon los botones de grupos
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //Definicion funciones
 /**
- * Ingresa el codigo de la forma. a partir de este filtra en la lista de objetos de forma el contiene este codigo.
- * Asigna a la variable shapeNameRef este objeto para más adelante usar su UID
- * @param {String que representa el codigo de la forma} shape
- */
-const setShapeNameRef = (shapeId) => {
-  if (shapeId) {
-    shapeNameRef = shapeId;
-    const tempRenderPair = renderPairs.filter(
-      (pair) => pair.shape == shapeNameRef
-    );
-    if (tempRenderPair[0]) {
-      setSrc(tempRenderPair);
-      loadTitles();
-      toogleTextureLoad(false);
-      reloadClient(tempRenderPair);
-    }
-  }
-};
-/**
  * Ingresa un objeto de la lista de pares desde el que se extrae el UID para actualizar el SRC del la etiqueta <iframe> en el html
  * @param {Objeto de la lista de pares} tempRenderPair
  */
 const setSrc = (tempRenderPair) => {
-  if (tempRenderPair[0].UID) {
-    model.src = `https://sketchfab.com/models/${tempRenderPair[0].UID}/embed?autostart=1`;
-    shapeGroupRef = tempRenderPair[0].group;
-    shapeMessurmentsRef = tempRenderPair[0].messurments;
+  if (tempRenderPair.UID) {
+    model.src = `https://sketchfab.com/models/${tempRenderPair.UID}/embed?autostart=1`;
+    shapeGroupRef = tempRenderPair.group;
+    shapeMessurmentsRef = tempRenderPair.messurments;
     textureNameRef = "000";
-    createOtherMedia(0);
+    createOtherMedia(tempRenderPair);
     checkLiked();
   } else {
     throw "Unable to set new model source";
   }
 };
 /**
- * Ingresa un objeto de la lista de pares desde el cual se extrae el UID y se usa para
- * recargar el cliente del API usado en la comunicacion con Skethfav
- * @param {Objeto de la lista de pares} tempRenderPair
- */
-const reloadClient = (tempRenderPair) => {
-  if (tempRenderPair[0].UID) {
-    uIdRef = tempRenderPair[0].UID;
-    const modelCanvas = document.getElementById("model-canvas");
-    loadClient(uIdRef);
-  } else {
-    throw "Unable to reload client";
-  }
-};
-/**
  * Re carga los titulos a partir de las variables de referencia
  */
-const loadTitles = () => {
+const loadTitles = (tempRenderPair) => {
   document
     .querySelectorAll(".shape-name")
-    .forEach((title) => (title.innerText = shapeNameRef));
+    .forEach((title) => (title.innerText = tempRenderPair.shape));
   document
     .querySelectorAll(".texture-name")
-    .forEach((title) => (title.innerText = textureNameRef));
+    .forEach((title) => (title.innerText = "000"));
   document
     .querySelectorAll(".group-name")
-    .forEach((title) => (title.innerText = shapeGroupRef));
+    .forEach((title) => (title.innerText = tempRenderPair.group));
   document
     .querySelectorAll(".messurments-name")
-    .forEach((title) => (title.innerText = shapeMessurmentsRef));
+    .forEach((title) => (title.innerText = tempRenderPair.messurments));
   checkLiked();
 };
 /**
@@ -109,23 +75,27 @@ const createTempDiv = () => {
   tempDiv.classList.add("image-holder");
   return tempDiv;
 };
+var BaseShapeButton = document.querySelector(".shape-button").cloneNode(true);
 /**
  * Crea y retorn aun boton, le da de fondo una imagen que extrae desde AWS y los estilos listados en el metodo
  * @param {Id de un objeto de la lista de pares usado para referenciar una imagen en AWS} shapeId
  * @returns Un boton con la imagen de una forma y los estilos listados en el metodo
  */
 const createShapeButton = (shapeId, textures) => {
-  const tempShapeButton = document.createElement("BUTTON");
-  tempShapeButton.classList.add("shape-button");
-  const buttonBGImage = document.createElement("IMG");
-  buttonBGImage.classList.add("button-image");
-  buttonBGImage.src = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/recursos_formas/${shapeId}.png`;
+  const tempShapeButton = BaseShapeButton.cloneNode(true);
+  tempShapeButton.srcset = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/recursos_formas/${shapeId}.png`;
+  const tempRenderPair = renderPairs.find((pair) => pair.shape == shapeId);
   tempShapeButton.onclick = () => {
-    activateShape(tempShapeButton);
-    setShapeNameRef(shapeId);
+    if (tempRenderPair) {
+      activateShape(tempShapeButton);
+      shapeNameRef = tempRenderPair.shape;
+      loadTitles(tempRenderPair);
+      setSrc(tempRenderPair);
+      loadClient(tempRenderPair);
+      toogleTextureLoad(false);
+    }
     constructTextureButtons(textures);
   };
-  tempShapeButton.appendChild(buttonBGImage);
   return tempShapeButton;
 };
 const activateGroup = (groupButton) => {
@@ -152,18 +122,19 @@ const activateTextures = (tempTextureButton) => {
     .forEach((button) => button.classList.remove("active-texture"));
   tempTextureButton.classList.add("active-texture");
 };
+
 /**
  * Filtra de la lista de botones de formas los que coinciden con el grupo del parametro y los inyecta en el div de los botones de formas
  * @param {Grupo usado para flitrar en la lista de botones de formas} group
  */
-const renderShapeButtons = (group, isFirstTime) => {
-  const shapesButtons = document.getElementById("shapes-buttons");
-  shapesButtons.classList.add("shapes-buttons");
+var shapesButtons = document.getElementById("shapes-buttons");
+shapesButtons.innerHTML = "";
+const renderShapeButtons = (group) => {
   const matchingButtons = shapeButtonsPairs.filter(
     (buttonPair) => buttonPair.group == group
   );
   shapesButtons.innerHTML = "";
-  matchingButtons.forEach((button, index) => {
+  matchingButtons.forEach((button) => {
     shapesButtons.appendChild(button.element);
   });
 };
@@ -187,20 +158,18 @@ const createGroupsButtons = () => {
   });
   isGroupButtons = true;
 };
+
 /**
  * Usando la lista de pares como base construye los botones que permiten seleccionar los modelos y los inyecta en una etiqueta DIV
  */
 const constructShapeButtons = (isFirstTime) => {
   renderPairs.forEach((shape, index) => {
-    const tempShapeDiv = createTempDiv();
-    tempShapeDiv.classList.add("shape-div");
     const tempShapeButton = createShapeButton(
       shape.shape,
       shape.availableTextures
     );
-    tempShapeDiv.appendChild(tempShapeButton);
     if (index == 0) activateShape(tempShapeButton);
-    shapeButtonsPairs.push({ group: shape.group, element: tempShapeDiv });
+    shapeButtonsPairs.push({ group: shape.group, element: tempShapeButton });
   });
   renderShapeButtons(shapeGroupRef, isFirstTime);
   isShapeButtons = true;
@@ -216,7 +185,9 @@ var baseTextureButton = document
  */
 createTextureButton = (textureId) => {
   const tempTextureButton = baseTextureButton.cloneNode(true);
-  tempTextureButton.querySelector(".texture-image").src = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/iconos_texturas/${textureId}.jpg`;
+  tempTextureButton.querySelector(
+    ".texture-image"
+  ).src = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/iconos_texturas/${textureId}.jpg`;
   tempTextureButton.addEventListener("click", () => {
     toogleTextureLoad(false);
     activateTextures(tempTextureButton);
@@ -227,17 +198,16 @@ createTextureButton = (textureId) => {
 /**
  * Usando la lista de texturas como base construye los botones que permiten seleccionar los modelos y los inyecta en una etiqueta DIV
  */
+var texturesButtons = document.getElementById("texture-buttons");
+texturesButtons.innerHTML = "";
 const constructTextureButtons = (textures) => {
-  let texturesButtons = document.getElementById("texture-buttons");
   texturesButtons.innerHTML = "";
   let renderingTextures = textures.filter((texture) =>
     texturesIds.includes(texture)
   );
   renderingTextures.forEach((textureId, index) => {
-    const tempTextureDiv = createTempDiv();
     const tempTextureButton = createTextureButton(textureId);
-    tempTextureDiv.appendChild(tempTextureButton);
-    texturesButtons.appendChild(tempTextureDiv);
+    texturesButtons.appendChild(tempTextureButton);
   });
   isTextureButtons = true;
 };
@@ -245,7 +215,7 @@ const constructTextureButtons = (textures) => {
  *
  * @param {*} index
  */
-const createOtherMedia = (index) => {
+const createOtherMedia = (tempRenderPair) => {
   const contextImages = document.getElementById("context-images");
   contextImages.innerHTML = "";
   const messurmentImages = document.getElementById("messurment-images");
@@ -254,8 +224,8 @@ const createOtherMedia = (index) => {
   tempContextImg.classList.add("context-images");
   const tempMessurmentImg = document.createElement("IMG");
   tempMessurmentImg.classList.add("messurment-images");
-  tempContextImg.src = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/recursos_formas/${shapeNameRef}_context${index}.jpg`;
-  tempMessurmentImg.src = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/recursos_formas/${shapeNameRef}_messurment${index}.jpg`;
+  tempContextImg.src = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/recursos_formas/${tempRenderPair.shape}_context0.jpg`;
+  tempMessurmentImg.src = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/recursos_formas/${tempRenderPair.shape}_messurment0.jpg`;
   tempContextImg.addEventListener("click", () => openModal(tempContextImg.src));
   tempMessurmentImg.addEventListener("click", () =>
     openModal(tempMessurmentImg.src)
@@ -270,37 +240,6 @@ const createOtherMedia = (index) => {
   messurmentImages.appendChild(tempMessurmentDIV);
 };
 /**
- *
- */
-// for (let index = 0; index < 3; index++) {
-//   const contextButton = document.getElementById(`set-context-image-${index}`);
-//   contextButton.onclick = () => {
-//     document.getElementById(
-//       "context-image"
-//     ).src = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/recursos_formas/${shapeNameRef}_context${index}.png`;
-//     for (let index2 = 0; index2 < 3; index2++) {
-//       document.getElementById(
-//         `set-context-image-${index2}`
-//       ).style.backgroundColor = "#c9c9c9";
-//     }
-//     contextButton.style.backgroundColor = "#332b17";
-//   };
-//   const messurmentButton = document.getElementById(
-//     `set-messurment-image-${index}`
-//   );
-//   messurmentButton.onclick = () => {
-//     document.getElementById(
-//       "messurment-image"
-//     ).src = `https://vajillascorona.s3.sa-east-1.amazonaws.com/personalizador/recursos/recursos_formas/${shapeNameRef}_messurment${index}.png`;
-//     for (let index2 = 0; index2 < 3; index2++) {
-//       document.getElementById(
-//         `set-messurment-image-${index2}`
-//       ).style.backgroundColor = "#c9c9c9";
-//     }
-//     messurmentButton.style.backgroundColor = "#332b17";
-//   };
-// }
-/**
  * Usando un URL extrae un documento TXT desde AWS que usa para definir la lista de pares y la lista de texturas
  * @param {Link a TXT con la informacion sobre modelos y texturas}
  */
@@ -311,6 +250,17 @@ const getData = () => {
       const newPairs = JSON.parse(t);
       listOfGroups = [...newPairs.groups];
       renderPairs = newPairs.pairs.filter((pair) => pair.isAvailable);
+      renderPairs.forEach((pair) => {
+        let groupPairs = renderPairs.filter((pair2) => pair2.UID === pair.UID);
+        if (groupPairs.length > 1) {
+          groupPairs.forEach((groupPair, index) => {
+            if (index > 0)
+              renderPairs.splice(renderPairs.indexOf(groupPair), 1);
+          });
+        }
+        pair.options = groupPairs;
+      });
+      console.log(renderPairs);
       texturesIds = newPairs.texturesIds
         .filter((texture) => texture.isAvailable)
         .map((texture) => texture.texture);
@@ -321,20 +271,20 @@ const getData = () => {
       shapeNameRef = renderPairs[0].shape;
       shapeGroupRef = renderPairs[0].group;
       shapeMessurmentsRef = renderPairs[0].messurments;
-      loadTitles();
+      createOtherMedia(renderPairs[0]);
+      loadTitles(renderPairs[0]);
     });
 };
 // Model Control ---------------------------------------------------------------------------------------
-function loadClient(uIdRef) {
+function loadClient(tempRenderPair) {
   var version = "1.12.1";
   var client = new Sketchfab(version, model);
-  var uid = uIdRef;
+  var uid = tempRenderPair.UID;
   let success = function success(api) {
     api.start(() => {
       api.addEventListener("viewerready", function () {
         toogleTextureLoad(true);
         model.style.opacity = "100%";
-        createOtherMedia(0);
         if (!isShapeButtons && !isTextureButtons && !isGroupButtons) getData();
         api.getTextureList(function (err, materials) {
           if (!err) {
@@ -365,7 +315,10 @@ function loadClient(uIdRef) {
                 textureNameRef = textureId;
                 if (!loaded) {
                   loaded = true;
-                  loadTitles();
+                  document
+                    .querySelectorAll(".texture-name")
+                    .forEach((title) => (title.innerText = textureNameRef));
+                  document;
                   toogleTextureLoad(true);
                 }
               }
@@ -432,12 +385,19 @@ const fillLiked = () => {
       (shape) => shape.shape === pair.shape
     ).messurments;
     element.querySelector(".w-input").value = pair.quantity;
-    element.querySelector(".w-input").addEventListener("input", function (evt) {
-      inputCantidad(
-        Number(this.value),
-        index,
-        element.querySelector(".w-input")
-      );
+    element
+      .querySelector(".w-input")
+      .addEventListener("change", function (evt) {
+        inputCantidad(
+          Number(this.value),
+          index,
+          element.querySelector(".w-input")
+        );
+      });
+    element.querySelector(".w-input").addEventListener("keypress", (enter) => {
+      if (enter.keyCode == 13) {
+        enter.preventDefault();
+      }
     });
     element.querySelector(
       ".image-40"
@@ -467,17 +427,17 @@ const fillForm = () => {
 };
 
 const inputCantidad = (number, pair, element) => {
-  likedPairs[pair].quantity = number;
-  if (likedPairs[pair].quantity < 24) {
+  if (number < 24) {
     if (confirm("Estás a punto de descartar la pieza\n ¿estás seguro?")) {
       likedPairs.splice(pair, 1);
       checkLiked();
       fillLiked();
       fillForm();
     } else {
-      likedPairs[pair].quantity = likedPairs[pair].quantity - number;
+      element.value = likedPairs[pair].quantity;
     }
   } else {
+    likedPairs[pair].quantity = number;
     element.value = likedPairs[pair].quantity;
     fillForm();
   }
@@ -527,12 +487,14 @@ document
   .querySelector(".heart-button")
   .addEventListener("click", () => likeClicked());
 
+var modalImage = document.querySelector(".modal-container");
+modalImage.addEventListener("click", () => closeModal());
+
 const closeModal = () => {
-  document.querySelector(".modal-container").style.display = "none";
+  modalImage.style.display = "none";
 };
 
 const openModal = (src) => {
-  let modalImage = document.querySelector(".modal-container");
   let additionalInformation = document.querySelector(".additional-information");
   additionalInformation.src = src;
   modalImage.style.display = "block";
